@@ -1,0 +1,2610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Estudo de Margem - Senac RN</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-main: #f5f7fb;
+      --bg-main-soft: #eef2f9;
+      --bg-card: #ffffff;
+
+      --primary: #004A8D;
+      --primary-soft: rgba(0, 74, 141, 0.10);
+      --primary-dark: #0b2874;
+      --accent: #F7941D;
+      --accent-soft: rgba(247, 148, 29, 0.16);
+
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #eab308;
+
+      --text-main: #0f172a;
+      --text-soft: #4b5563;
+      --border-soft: rgba(148, 163, 184, 0.45);
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.10);
+
+      --status-livre: #22c55e;
+      --status-razoavel: #eab308;
+      --status-sem-margem: #0ea5e9;
+      --status-comprometida: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                   "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(0, 74, 141, 0.12), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.04), transparent 55%),
+        var(--bg-main);
+      color: var(--text-main);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background:
+        linear-gradient(180deg, #0b2874, #004a8d 55%, #001428 100%);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      box-shadow: 10px 0 32px rgba(15, 23, 42, 0.55);
+      z-index: 20;
+      color: #e5e7eb;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 20% 10%, #e0f2fe, transparent 55%),
+        radial-gradient(circle at 70% 80%, #60a5fa, #004a8d);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #eff6ff;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow:
+        0 0 0 1px rgba(191, 219, 254, 0.9),
+        0 14px 32px rgba(15, 23, 42, 0.9);
+    }
+
+    .brand-title {
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: #cbd5f5;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-card {
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.32), transparent 55%),
+        rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      padding: 14px 14px 16px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .upload-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), #fdc180);
+      color: #1f2937;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      box-shadow:
+        0 0 0 1px rgba(254, 249, 195, 0.9),
+        0 16px 32px rgba(15, 23, 42, 0.7);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+    }
+
+    .upload-label:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 1),
+        0 20px 40px rgba(15, 23, 42, 0.85);
+    }
+
+    .upload-label .icon {
+      display: inline-flex;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(249, 250, 251, 0.9);
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #92400e;
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.8);
+    }
+
+    .file-name {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #e5e7eb;
+      word-break: break-all;
+    }
+
+    .debug-info {
+      font-size: 11px;
+      color: #e5e7eb;
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.9);
+      word-break: break-all;
+    }
+
+    .sidebar-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(191, 219, 254, 0.9);
+      color: #e5e7eb;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .nav-item {
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: #cbd5f5;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      background: transparent;
+    }
+
+    .nav-item:hover {
+      background: rgba(30, 64, 175, 0.6);
+      color: #f9fafb;
+      border-color: rgba(191, 219, 254, 0.8);
+    }
+
+    .nav-item.active {
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.6), transparent 60%),
+        #020617;
+      color: #e5e7eb;
+      border-color: rgba(191, 219, 254, 1);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.9);
+    }
+
+    .nav-item .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: transparent;
+      margin-left: 10px;
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+      transition: all 0.2s ease;
+    }
+
+    .nav-item.active .dot {
+      background: #facc15;
+      box-shadow:
+        0 0 0 4px rgba(234, 179, 8, 0.65),
+        0 0 12px rgba(250, 204, 21, 0.9);
+    }
+
+    .signature {
+      margin-top: 16px;
+      font-size: 11px;
+      color: #e5e7eb;
+      border-top: 1px solid rgba(148, 163, 184, 0.8);
+      padding-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .signature span {
+      font-weight: 600;
+      color: #bfdbfe;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 1px 4px;
+      border-radius: 6px;
+    }
+
+    .content {
+      padding: 22px 26px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background:
+        radial-gradient(circle at top right, rgba(0, 74, 141, 0.10), transparent 55%),
+        radial-gradient(circle at bottom left, rgba(15, 23, 42, 0.06), transparent 60%),
+        var(--bg-main-soft);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .topbar-title h1 {
+      margin: 0;
+      font-size: 23px;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+    }
+
+    .topbar-title h1 span.pill-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      color: var(--primary-dark);
+      background: #e0f2fe;
+    }
+
+    .topbar-title p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-soft);
+      max-width: 760px;
+    }
+
+    .topbar-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      margin-top: 4px;
+    }
+
+    .filter {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-soft);
+    }
+
+    .filter select {
+      min-width: 170px;
+      padding: 7px 9px;
+      border-radius: 9px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: #ffffff;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .filter select[multiple] {
+      height: 100px;
+    }
+
+    .filter select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.7);
+    }
+
+    .btn-small {
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: #ffffff;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #1d4ed8);
+      color: #f9fafb;
+      border-color: transparent;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.5);
+      font-weight: 600;
+    }
+
+    .view-section {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .view-section.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1.4fr;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .card {
+      background:
+        radial-gradient(circle at top left, rgba(239, 246, 255, 1), transparent 60%),
+        var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px 16px 14px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(209, 213, 219, 0.9);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--primary);
+    }
+
+    .card-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+      max-width: 800px;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      border: 1px solid rgba(129, 140, 248, 0.9);
+      color: var(--primary-dark);
+      font-weight: 500;
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .metric {
+      background:
+        radial-gradient(circle at top left, rgba(219, 234, 254, 0.9), transparent 60%),
+        #ffffff;
+      border-radius: var(--radius-md);
+      padding: 9px 10px;
+      border: 1px solid rgba(209, 213, 219, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .metric-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .metric-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--success);
+      align-self: flex-start;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .metric-tag.warn {
+      background: rgba(234, 179, 8, 0.12);
+      color: #b45309;
+      border-color: rgba(234, 179, 8, 0.5);
+    }
+
+    .metric-tag.danger {
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.45);
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1.3fr 1.1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .card-small {
+      padding: 12px 12px 10px;
+      border-radius: var(--radius-md);
+      background:
+        radial-gradient(circle at top left, rgba(239, 246, 255, 0.9), transparent 55%),
+        #ffffff;
+      border: 1px solid rgba(209, 213, 219, 0.9);
+    }
+
+    .card-small h3 {
+      margin: 0 0 4px;
+      font-size: 12px;
+      color: var(--primary);
+    }
+
+    .card-small p {
+      margin: 0 0 6px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .chart-wrapper-small { position: relative; height: 150px; }
+    .chart-wrapper       { position: relative; height: 220px; }
+    .chart-wrapper-large { position: relative; height: 300px; }
+
+    .table-wrapper {
+      max-height: 400px;
+      overflow: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(209, 213, 219, 0.9);
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 820px;
+    }
+
+    thead {
+      background:
+        linear-gradient(90deg, rgba(239, 246, 255, 1), rgba(219, 234, 254, 1));
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 11px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    th.sortable { cursor: pointer; }
+
+    tbody tr:nth-child(even) { background: #f9fafb; }
+
+    tbody tr:hover { background: #eff6ff; }
+
+    .empty-state {
+      font-size: 12px;
+      color: var(--text-soft);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .status-pill {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 500;
+      display: inline-block;
+      border: 1px solid transparent;
+    }
+
+    .status-sem-margem {
+      background: rgba(14, 165, 233, 0.10);
+      color: var(--status-sem-margem);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    .status-comprometida {
+      background: rgba(239, 68, 68, 0.10);
+      color: var(--status-comprometida);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .status-razoavel {
+      background: rgba(234, 179, 8, 0.12);
+      color: var(--status-razoavel);
+      border-color: rgba(234, 179, 8, 0.6);
+    }
+
+    .status-livre {
+      background: rgba(34, 197, 94, 0.10);
+      color: var(--status-livre);
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .row-critical {
+      background: linear-gradient(90deg, rgba(248, 113, 113, 0.18), #fef2f2);
+    }
+
+    .btn-action {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(135deg, var(--primary), #2563eb);
+      color: #f9fafb;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+
+    .footer {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text-soft);
+      text-align: center;
+      padding-top: 8px;
+      border-top: 1px solid rgba(209, 213, 219, 0.9);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 760px;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 28px 70px rgba(15, 23, 42, 0.25);
+      transform: scale(0.96) translateY(14px);
+      transition: transform 0.25s ease;
+      border: 1px solid rgba(191, 219, 254, 0.9);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background:
+        radial-gradient(circle at top left, rgba(219, 234, 254, 0.85), transparent 55%),
+        #ffffff;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: none;
+      background: #f9fafb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #6b7280;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      max-height: calc(90vh - 70px);
+      background: #ffffff;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .detail-item {
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 10px;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .detail-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .grid { grid-template-columns: 1fr; }
+      .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .charts-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .content { padding: 16px; }
+      .metrics-row { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <div class="brand-icon">SPE</div>
+        <div>
+          <div class="brand-title">Estudo de Margem</div>
+          <div class="brand-subtitle">Monitor de Margem</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section-title">SENAC RN</div>
+      <div class="sidebar-card">
+        <label class="upload-label" for="fileInput">
+          <span class="icon">↑</span>
+          <span>Carregar base (CSV SENAC_RN_MARGEM)</span>
+        </label>
+        <input type="file" id="fileInput" accept=".csv" />
+        <div class="file-name" id="fileName">Nenhum arquivo carregado</div>
+        <div class="debug-info" id="debugInfo">Aguardando arquivo...</div>
+        <div class="sidebar-badges">
+          <span class="badge">SENAC_RN_MARGEM</span>
+          <span class="badge">Filtros avançados</span>
+          <span class="badge">Convênios Vision / Mercado</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section-title" style="margin-top:20px;">Visões</div>
+      <div class="sidebar-nav">
+        <div class="nav-item active" data-view="resumo">
+          <span>Resumo Geral</span><span class="dot"></span>
+        </div>
+        <div class="nav-item" data-view="credito">
+          <span>Crédito do Trabalhador</span><span class="dot"></span>
+        </div>
+        <div class="nav-item" data-view="base">
+          <span>Base Completa</span><span class="dot"></span>
+        </div>
+        <div class="nav-item" data-view="funcao">
+          <span>Por Cargo</span><span class="dot"></span>
+        </div>
+        <div class="nav-item" data-view="secao">
+          <span>Por Filial</span><span class="dot"></span>
+        </div>
+        <div class="nav-item" data-view="convenios">
+          <span>Convênios</span><span class="dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="signature">
+      <div>Criado por <span>Luciano Cirino</span></div>
+      <div>Parceiros <span>Equipe do Setor Pessoal - Senac RN</span></div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1>Dashboard de Estudo de Margem <span class="pill-title">SENAC RN</span></h1>
+        <p>
+          Upload da base SENAC_RN_MARGEM (CSV) com colunas originais para análise dinâmica por filial,
+          seção, cargo, status e convênios.
+        </p>
+      </div>
+      <div class="topbar-pills">
+        <div class="pill"><span class="pill-dot"></span>Atualiza automaticamente conforme filtros e nova base</div>
+        <div class="pill">Status calculado: Livre, Razoável, Comprometida, Sem Margem Disponível</div>
+      </div>
+    </header>
+
+    <section class="filters">
+      <div class="filter">
+        <label for="filterSecao">Filtrar por Seção (multi)</label>
+        <select id="filterSecao" multiple size="5"></select>
+      </div>
+      <div class="filter">
+        <label for="filterFilial">Filtrar por Filial (multi)</label>
+        <select id="filterFilial" multiple size="5"></select>
+      </div>
+      <div class="filter">
+        <label for="filterCargo">Filtrar por Cargo (multi)</label>
+        <select id="filterCargo" multiple size="5"></select>
+      </div>
+      <div class="filter">
+        <label for="filterStatus">Filtrar por Status (multi)</label>
+        <select id="filterStatus" multiple size="4">
+          <option value="Sem Margem Disponível">Sem Margem Disponível</option>
+          <option value="Margem Comprometida">Margem Comprometida</option>
+          <option value="Margem Razoável">Margem Razoável</option>
+          <option value="Margem Livre">Margem Livre</option>
+        </select>
+      </div>
+      <button class="btn-small" id="btnClearFilters">Limpar filtros</button>
+      <button class="btn-small btn-primary" id="btnExportFiltro">Exportar base filtrada (CSV)</button>
+      <button class="btn-small btn-primary" id="btnExportRanking">Exportar ranking Top10 (CSV)</button>
+      <span style="font-size:10px;color:var(--text-soft);">
+        Dica: use Ctrl (ou Command no Mac) para selecionar vários itens nas listas.
+      </span>
+    </section>
+
+    <!-- Resumo Geral -->
+    <section class="view-section active" id="view-resumo">
+      <section class="grid">
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Resumo de Colaboradores e Margem</div>
+              <div class="card-subtitle">
+                Indicadores gerais com base na planilha (considera filtros, se aplicável).
+              </div>
+            </div>
+            <span class="chip" id="summaryChip">Aguardando dados</span>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric">
+              <div class="metric-label">Total de colaboradores (visão atual)</div>
+              <div class="metric-value" id="totalColab">–</div>
+              <div class="metric-tag" id="totalColabTag">Carregue um CSV</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Colaboradores em Situação Razoável</div>
+              <div class="metric-value" id="avgMarginUsed">–</div>
+              <div class="metric-tag warn" id="avgMarginTag">–</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Colaboradores em Situação Crítica / Comprometida</div>
+              <div class="metric-value" id="pctCompromised">–</div>
+              <div class="metric-tag danger" id="pctCompromisedTag">–</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Colaboradores em Situação Livre</div>
+              <div class="metric-value" id="avgMarginAvailable">–</div>
+              <div class="metric-tag" id="avgMarginAvailableTag">–</div>
+            </div>
+          </div>
+
+          <div class="charts-row">
+            <div class="card-small">
+              <h3>Distribuição da Margem Utilizada</h3>
+              <p>Faixas de uso em % (0–50, 50,01–69,99, 70, 70,01–100).</p>
+              <div class="chart-wrapper-small">
+                <canvas id="chartMarginBands"></canvas>
+              </div>
+            </div>
+            <div class="card-small">
+              <h3>Status da Margem</h3>
+              <p>Quantidade de colaboradores por status.</p>
+              <div class="chart-wrapper-small">
+                <canvas id="chartStatus"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Ranking de Margem por Colaborador</div>
+              <div class="card-subtitle">
+                Top 10 risco (maior utilizada) e Top 10 folga (maior disponível), sem duplicidade.
+              </div>
+            </div>
+            <span class="chip">Top 10 risco / folga</span>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>CHAPA</th>
+                  <th>Nome</th>
+                  <th>Cargo</th>
+                  <th>Função</th>
+                  <th>Seção</th>
+                  <th>Margem utilizada (%)</th>
+                  <th>Margem disponível (%)</th>
+                  <th>Status</th>
+                  <th>Tipo</th>
+                </tr>
+              </thead>
+              <tbody id="tableRanking">
+                <tr>
+                  <td colspan="9" class="empty-state">
+                    Carregue um arquivo CSV para ver o ranking.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <!-- Crédito do Trabalhador -->
+    <section class="view-section" id="view-credito">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Crédito do Trabalhador</div>
+            <div class="card-subtitle">
+              Compara a margem de 35% da remuneração com o total de parcelas do Crédito do Trabalhador,
+              indicando se a parcela está acima do limite.
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric">
+            <div class="metric-label">Registros com dados válidos</div>
+            <div class="metric-value" id="creditoTotalValid">–</div>
+            <div class="metric-tag" id="creditoTotalValidTag">–</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Parcela &gt; 35% (Sim)</div>
+            <div class="metric-value" id="creditoAcima">–</div>
+            <div class="metric-tag danger" id="creditoAcimaTag">–</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Parcela ≤ 35% (Não)</div>
+            <div class="metric-value" id="creditoDentro">–</div>
+            <div class="metric-tag" id="creditoDentroTag">–</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">% acima do limite</div>
+            <div class="metric-value" id="creditoPctAcima">–</div>
+            <div class="metric-tag warn" id="creditoPctAcimaTag">–</div>
+          </div>
+        </div>
+
+        <div class="charts-row" style="margin-top:14px;">
+          <div class="card-small" style="padding:20px;">
+            <h3>Parcela Superior ao Limite (35%)</h3>
+            <p>Quantidade de colaboradores com parcelas acima ou dentro do limite (apenas parcelas &gt; 0,00).</p>
+            <div class="chart-wrapper">
+              <canvas id="chartCreditoLimite"></canvas>
+            </div>
+          </div>
+
+          <div class="card-small" style="padding:20px;">
+            <h3>Base - Crédito do Trabalhador</h3>
+            <p>Colaboradores com remuneração e total de parcelas &gt; 0,00.</p>
+            <div class="table-wrapper" style="max-height:260px;">
+              <table id="tableCreditoBase">
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort-key="nome">Nome</th>
+                    <th class="sortable" data-sort-key="filial">Filial</th>
+                    <th class="sortable" data-sort-key="cargo">Cargo</th>
+                    <th class="sortable" data-sort-key="funcao">Função</th>
+                    <th class="sortable" data-sort-key="salario">Remuneração total</th>
+                    <th class="sortable" data-sort-key="margem35">Margem 35%</th>
+                    <th class="sortable" data-sort-key="parcelas">Total parcelas crédito trab.</th>
+                    <th class="sortable" data-sort-key="pct">Parcela / Remuneração (%)</th>
+                    <th class="sortable" data-sort-key="acima">Acima do limite (35%)?</th>
+                  </tr>
+                </thead>
+                <tbody id="tableCreditoBaseBody">
+                  <tr>
+                    <td colspan="9" class="empty-state">
+                      Carregue um arquivo CSV para visualizar esta visão.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-row" style="margin-top:20px;">
+          <div class="card-small" style="padding:20px;">
+            <h3>Ranking – Top Cargos (Crédito do Trabalhador)</h3>
+            <p>Cargos com maior média de parcela / remuneração (%) no Crédito do Trabalhador.</p>
+            <div class="table-wrapper" style="max-height:220px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cargo</th>
+                    <th>Qtd</th>
+                    <th>Média parcela/remuneração (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="tableCreditoCargoRanking">
+                  <tr>
+                    <td colspan="3" class="empty-state">
+                      Carregue um arquivo CSV para visualizar o ranking por cargo.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-small" style="padding:20px;">
+            <h3>Ranking – Top Filiais (Crédito do Trabalhador)</h3>
+            <p>Filiais com maior média de parcela / remuneração (%) no Crédito do Trabalhador.</p>
+            <div class="table-wrapper" style="max-height:220px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Filial</th>
+                    <th>Qtd</th>
+                    <th>Média parcela/remuneração (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="tableCreditoFilialRanking">
+                  <tr>
+                    <td colspan="3" class="empty-state">
+                      Carregue um arquivo CSV para visualizar o ranking por filial.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Base Completa -->
+    <section class="view-section" id="view-base">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Base Completa de Colaboradores</div>
+            <div class="card-subtitle">
+              Todos os registros da base com detalhes de risco de margem e convênios.
+            </div>
+          </div>
+          <span class="chip" id="baseCount">0 registros</span>
+        </div>
+
+        <div class="table-wrapper" style="max-height:600px;">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable" data-sort-key="CHAPA">CHAPA</th>
+                <th class="sortable" data-sort-key="NOME">Nome</th>
+                <th class="sortable" data-sort-key="CARGO">Cargo</th>
+                <th class="sortable" data-sort-key="FUNCAO">Função</th>
+                <th class="sortable" data-sort-key="SECAO">Seção</th>
+                <th class="sortable" data-sort-key="FILIAL">Filial</th>
+                <th class="sortable" data-sort-key="STATUS">Status</th>
+                <th class="sortable" data-sort-key="MU">% margem utilizada</th>
+                <th class="sortable" data-sort-key="MD">% margem disponível</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tableBaseCompleta">
+              <tr>
+                <td colspan="10" class="empty-state">
+                  Carregue um arquivo CSV para visualizar a base completa.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- Por Cargo -->
+    <section class="view-section" id="view-funcao">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Análise por Cargo</div>
+            <div class="card-subtitle">
+              Médias de margem utilizada (%) agrupadas por cargo (Top 10).
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrapper-large">
+          <canvas id="chartFuncaoDetailed"></canvas>
+        </div>
+      </section>
+    </section>
+
+    <!-- Por Filial -->
+    <section class="view-section" id="view-secao">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Análise por Filial</div>
+            <div class="card-subtitle">
+              Médias de margem utilizada (%) por Filial. Ao clicar em uma Filial,
+              o gráfico de Seções é exibido.
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrapper-large">
+          <canvas id="chartFilialDetailed"></canvas>
+        </div>
+        <div id="secaoContainer" class="chart-wrapper-large" style="margin-top:16px; display:none;">
+          <canvas id="chartSecaoDetailed"></canvas>
+        </div>
+      </section>
+    </section>
+
+    <!-- Convênios -->
+    <section class="view-section" id="view-convenios">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Uso de Convênios (Vision / Supermercado)</div>
+            <div class="card-subtitle">
+              Limite médio vs uso médio e Top 10 maiores usuários.
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="card-small" style="padding:20px;">
+            <h3>Vision - Limite vs Uso</h3>
+            <p>Comparativo médio em R$.</p>
+            <div class="chart-wrapper"><canvas id="chartVisionDetailed"></canvas></div>
+          </div>
+          <div class="card-small" style="padding:20px;">
+            <h3>Supermercado - Limite vs Uso</h3>
+            <p>Comparativo médio em R$.</p>
+            <div class="chart-wrapper"><canvas id="chartMarketDetailed"></canvas></div>
+          </div>
+        </div>
+
+        <div class="charts-row" style="margin-top:20px;">
+          <div class="card-small" style="padding:20px;">
+            <h3>Top 10 - Maior uso Vision</h3>
+            <div class="chart-wrapper"><canvas id="chartVisionTop"></canvas></div>
+          </div>
+          <div class="card-small" style="padding:20px;">
+            <h3>Top 10 - Maior uso Supermercado</h3>
+            <div class="chart-wrapper"><canvas id="chartMarketTop"></canvas></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <footer class="footer">
+      Criado por <strong>Luciano Cirino</strong>
+    </footer>
+    <footer class="footer">
+      Parceiros <strong>Equipe do Setor Pessoal - Senac RN</strong>
+    </footer>
+  </main>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">Detalhes do colaborador</div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+  const COLS = {
+    CHAPA: "CHAPA",
+    NOME: "NOME",
+    CARGO: "CARGO",
+    FUNCAO: "FUNCAO",
+    SECAO: "SECAO",
+    ADMISSAO: "ADMISSAO",
+    FILIAL: "FILIAL",
+    SITUACAO: "SITUACAO",
+    CPF: "CPF",
+
+    REMUNERACAO: "REMUNERACAO TOTAL",
+    INSS: "INSS",
+    IRRF: "IRRF",
+    MARGEM35: "MARGEM 35%",
+    CREDTRAB_PARCELAS: "TOTAL PARCELAS CREDITO DO TRABALHADOR",
+    PARCELA_SUPERIOR_LIMITE: "PARCELA_SUPERIOR_LIMITE",
+    TOTALDESCFIXOS: "TOTAL DESCONTO FIXOS + CONSIGNADOS",
+    DESCONTOVARIAVEIS: "DESCONTO VARIAVEIS",
+    TOTALDESCONTOS: "TOTAL GERAL DOS DESCONTOS",
+    MARGEMUTILIZADA: "MARGEM UTILIZADA",
+    LIMITE_MARGEM_PERMITIDO: "LIMITE_DE_MARGEM_PERMITIDO",
+    MARGEMDISPONIVEL: "MARGEM DISPONIVEL",
+    STATUSMARGEM: "STATUS_MARGEM",
+
+    LIMITEVISION: "LIMITE DE CREDITO VISION",
+    USOVISION: "MEDIA USO MENSAL VISION",
+    TXESPORTE: "TX ESPORTE",
+
+    LIMITEMERCADO: "LIMITE CREDITO CONV SUPERMERCADO",
+    USOMERCADO: "MEDIA DE USO MENSAL CONV SUPERMERCADO",
+
+    ALIMENTACAO_USO: "ALIMENTACAO - USO MENSAL",
+    TRANSPORTE_USO: "TRANSPORTE - USO MENSAL",
+    ENCARGOS_USO: "ENCARGOS - USO MENSAL",
+    UNIMED_USO: "UNIMED - USO MENSAL"
+  };
+
+  let rawData = [];
+  let filteredData = null;
+  let charts = {};
+  let currentView = "resumo";
+  let baseSortState = { key: null, asc: true };
+  let lastRanking = [];
+  let filialSecaoCache = {};
+  let creditoBaseData = [];
+  let creditoSortState = { key: "pct", asc: false };
+
+  const fileInput = document.getElementById("fileInput");
+  const fileNameEl = document.getElementById("fileName");
+  const debugInfoEl = document.getElementById("debugInfo");
+
+  const filterSecaoEl = document.getElementById("filterSecao");
+  const filterFilialEl = document.getElementById("filterFilial");
+  const filterCargoEl = document.getElementById("filterCargo");
+  const filterStatusEl = document.getElementById("filterStatus");
+
+  const btnClearFilters = document.getElementById("btnClearFilters");
+  const btnExportFiltro = document.getElementById("btnExportFiltro");
+  const btnExportRanking = document.getElementById("btnExportRanking");
+
+  const summaryChip = document.getElementById("summaryChip");
+  const totalColabEl = document.getElementById("totalColab");
+  const totalColabTag = document.getElementById("totalColabTag");
+  const avgMarginUsedEl = document.getElementById("avgMarginUsed");
+  const avgMarginTag = document.getElementById("avgMarginTag");
+  const pctCompromisedEl = document.getElementById("pctCompromised");
+  const pctCompromisedTag = document.getElementById("pctCompromisedTag");
+  const avgMarginAvailableEl = document.getElementById("avgMarginAvailable");
+  const avgMarginAvailableTag = document.getElementById("avgMarginAvailableTag");
+
+  const baseCountEl = document.getElementById("baseCount");
+  const tableRankingBody = document.getElementById("tableRanking");
+  const tableBaseCompletaBody = document.getElementById("tableBaseCompleta");
+
+  const creditoTotalValidEl = document.getElementById("creditoTotalValid");
+  const creditoTotalValidTagEl = document.getElementById("creditoTotalValidTag");
+  const creditoAcimaEl = document.getElementById("creditoAcima");
+  const creditoAcimaTagEl = document.getElementById("creditoAcimaTag");
+  const creditoDentroEl = document.getElementById("creditoDentro");
+  const creditoDentroTagEl = document.getElementById("creditoDentroTag");
+  const creditoPctAcimaEl = document.getElementById("creditoPctAcima");
+  const creditoPctAcimaTagEl = document.getElementById("creditoPctAcimaTag");
+
+  const tableCreditoBaseBody = document.getElementById("tableCreditoBaseBody");
+  const tableCreditoCargoRankingBody = document.getElementById("tableCreditoCargoRanking");
+  const tableCreditoFilialRankingBody = document.getElementById("tableCreditoFilialRanking");
+
+  const detailModal = document.getElementById("detailModal");
+  const modalBody = document.getElementById("modalBody");
+
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const view = item.dataset.view;
+      switchView(view);
+      document.querySelectorAll(".nav-item").forEach(nav => nav.classList.remove("active"));
+      item.classList.add("active");
+    });
+  });
+
+  function switchView(viewName) {
+    currentView = viewName;
+    document.querySelectorAll(".view-section").forEach(section => section.classList.remove("active"));
+    const target = document.getElementById(`view-${viewName}`);
+    if (target) target.classList.add("active");
+    setTimeout(renderCurrentView, 50);
+  }
+
+  function renderCurrentView() {
+    if (!rawData.length) return;
+    if (currentView === "resumo")      renderResumo();
+    else if (currentView === "base")   updateBaseCompleta();
+    else if (currentView === "credito") renderCreditoView();
+    else if (currentView === "funcao")  renderFuncaoView();
+    else if (currentView === "secao")   renderFilialView();
+    else if (currentView === "convenios") renderConveniosView();
+  }
+
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    fileNameEl.textContent = file.name;
+    debugInfoEl.textContent = "Lendo arquivo...";
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target.result;
+        debugInfoEl.textContent = "Processando CSV...";
+        rawData = parseCSV(text);
+        filteredData = null;
+        if (!rawData.length) {
+          debugInfoEl.textContent = "Nenhum dado encontrado no CSV.";
+          return;
+        }
+        debugInfoEl.textContent = `Base carregada com ${rawData.length} registros.`;
+        populateFilters();
+        renderResumo();
+        updateBaseCompleta();
+        renderCurrentView();
+      } catch (err) {
+        console.error(err);
+        debugInfoEl.textContent = "Erro ao processar o CSV (ver Console).";
+      }
+    };
+    reader.readAsText(file, "UTF-8");
+  });
+
+  function parseCSV(text) {
+    if (!text) return [];
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (!lines.length) return [];
+    const firstLine = lines[0];
+    const delimiter =
+      (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ";" : ",";
+    const headers = splitCSVLine(firstLine, delimiter).map(
+      h => h.replace(/^"|"$/g, "").trim()
+    );
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+      const parts = splitCSVLine(line, delimiter);
+      if (parts.length !== headers.length) continue;
+      const row = {};
+      headers.forEach((h, idx) => {
+        row[h] = parts[idx].replace(/^"|"$/g, "").trim();
+      });
+      data.push(row);
+    }
+    return data;
+  }
+
+  function splitCSVLine(line, delimiter) {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+        current += ch;
+      } else if (ch === delimiter && !inQuotes) {
+        result.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    result.push(current);
+    return result;
+  }
+
+  function getActiveData() {
+    return filteredData || rawData;
+  }
+
+  function toNumber(val) {
+    if (val == null) return NaN;
+    let s = String(val).trim();
+    if (!s) return NaN;
+    s = s.replace(/\s+/g, "");
+    const lastComma = s.lastIndexOf(",");
+    const lastDot   = s.lastIndexOf(".");
+    if (lastComma !== -1 && lastDot !== -1) {
+      if (lastComma > lastDot) {
+        s = s.replace(/\./g, "").replace(",", ".");
+      } else {
+        s = s.replace(/,/g, "");
+      }
+    } else if (lastComma !== -1) {
+      s = s.replace(/\./g, "").replace(",", ".");
+    } else if (lastDot !== -1) {
+      s = s.replace(/,/g, "");
+    }
+    const n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  }
+
+  function toPercent(val) {
+    const n = toNumber(val);
+    if (isNaN(n)) return NaN;
+    const a = Math.abs(n);
+    if (a > 0 && a <= 3) return n * 100;
+    return n;
+  }
+
+  function formatPercent(v) {
+    const n = typeof v === "number" ? v : toPercent(v);
+    if (isNaN(n)) return "";
+    return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function formatBRL(v) {
+    const n = toNumber(v);
+    if (isNaN(n)) return "";
+    return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function normalizeText(t) {
+    if (t == null) return "";
+    return String(t)
+      .trim()
+      .replace(/\s+/g, " ")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
+  function categorizeStatusFromPercent(muPercent) {
+    const v = toPercent(muPercent);
+    if (isNaN(v)) return "";
+    if (v < 50) return "Margem Livre";
+    if (v >= 50 && v < 70) return "Margem Razoável";
+    if (Math.abs(v - 70) <= 0.01) return "Sem Margem Disponível";
+    if (v > 70) return "Margem Comprometida";
+    return "";
+  }
+
+  function canonicalStatus(statusRaw, muForFallback) {
+    const s = normalizeText(statusRaw);
+    if (s.includes("sem") && s.includes("margem")) return "Sem Margem Disponível";
+    if (s.includes("compromet")) return "Margem Comprometida";
+    if (s.includes("razo")) return "Margem Razoável";
+    if (s.includes("livre")) return "Margem Livre";
+    return categorizeStatusFromPercent(muForFallback);
+  }
+
+  function getStatusClass(status) {
+    if (status === "Sem Margem Disponível") return "status-sem-margem";
+    if (status === "Margem Comprometida")   return "status-comprometida";
+    if (status === "Margem Razoável")       return "status-razoavel";
+    if (status === "Margem Livre")          return "status-livre";
+    return "";
+  }
+
+  function getStatusColor(status) {
+    if (status === "Sem Margem Disponível") return "#0ea5e9";
+    if (status === "Margem Comprometida")   return "#ef4444";
+    if (status === "Margem Razoável")       return "#eab308";
+    if (status === "Margem Livre")          return "#22c55e";
+    return "#9ca3af";
+  }
+
+  function getSelectedValues(selectEl) {
+    return Array.from(selectEl.selectedOptions).map(o => o.value).filter(v => v);
+  }
+
+  function clearMultiSelect(selectEl) {
+    Array.from(selectEl.options).forEach(o => { o.selected = false; });
+  }
+
+  function fillMultiSelect(selectEl, values) {
+    const prev = new Set(Array.from(selectEl.selectedOptions).map(o => o.value));
+    selectEl.innerHTML = "";
+    values.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      if (prev.has(v)) opt.selected = true;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  function populateFilters() {
+    const data = rawData;
+    const secoes = new Set();
+    const filiais = new Set();
+    const cargos  = new Set();
+
+    data.forEach(row => {
+      if (row[COLS.SECAO])  secoes.add(row[COLS.SECAO]);
+      if (row[COLS.FILIAL]) filiais.add(row[COLS.FILIAL]);
+      if (row[COLS.CARGO])  cargos.add(row[COLS.CARGO]);
+    });
+
+    fillMultiSelect(filterSecaoEl, Array.from(secoes).sort());
+    fillMultiSelect(filterFilialEl, Array.from(filiais).sort());
+    fillMultiSelect(filterCargoEl, Array.from(cargos).sort());
+  }
+
+  function applyFilters() {
+    if (!rawData.length) return;
+    const secoesSel  = getSelectedValues(filterSecaoEl);
+    const filiaisSel = getSelectedValues(filterFilialEl);
+    const cargosSel  = getSelectedValues(filterCargoEl);
+    const statusSel  = getSelectedValues(filterStatusEl);
+
+    filteredData = rawData.filter(row => {
+      if (secoesSel.length && !secoesSel.includes(row[COLS.SECAO] || ""))  return false;
+      if (filiaisSel.length && !filiaisSel.includes(row[COLS.FILIAL] || "")) return false;
+      if (cargosSel.length  && !cargosSel.includes(row[COLS.CARGO] || ""))  return false;
+      if (statusSel.length) {
+        const st = canonicalStatus(row[COLS.STATUSMARGEM], row[COLS.MARGEMUTILIZADA]);
+        if (!statusSel.includes(st)) return false;
+      }
+      return true;
+    });
+
+    renderResumo();
+    updateBaseCompleta();
+    renderCurrentView();
+  }
+
+  filterSecaoEl.addEventListener("change", applyFilters);
+  filterFilialEl.addEventListener("change", applyFilters);
+  filterCargoEl.addEventListener("change", applyFilters);
+  filterStatusEl.addEventListener("change", applyFilters);
+
+  btnClearFilters.addEventListener("click", () => {
+    clearMultiSelect(filterSecaoEl);
+    clearMultiSelect(filterFilialEl);
+    clearMultiSelect(filterCargoEl);
+    clearMultiSelect(filterStatusEl);
+    filteredData = null;
+    renderResumo();
+    updateBaseCompleta();
+    renderCurrentView();
+  });
+
+  btnExportFiltro.addEventListener("click", () => {
+    const data = getActiveData();
+    if (!data.length) return;
+    exportCSV(data, "senacrnmargem_filtrado.csv");
+  });
+
+  btnExportRanking.addEventListener("click", () => {
+    if (!lastRanking.length) return;
+    exportCSV(lastRanking, "senacrnmargem_ranking_top10.csv");
+  });
+
+  function exportCSV(data, filename) {
+    if (!data.length) return;
+    const headers = Object.keys(data[0]);
+    const lines = [];
+    lines.push(headers.join(";"));
+    data.forEach(row => {
+      const line = headers.map(h => {
+        const v = row[h] != null ? String(row[h]) : "";
+        return `"${v.replace(/"/g, '""')}"`;
+      }).join(";");
+      lines.push(line);
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function destroyChart(name) {
+    if (charts[name]) {
+      charts[name].destroy();
+      delete charts[name];
+    }
+  }
+
+  function renderResumo() {
+    const data = getActiveData();
+    if (!data.length) {
+      summaryChip.textContent = "Aguardando dados";
+      totalColabEl.textContent = "–";
+      totalColabTag.textContent = "Carregue um CSV";
+      avgMarginUsedEl.textContent = "–";
+      avgMarginAvailableEl.textContent = "–";
+      pctCompromisedEl.textContent = "–";
+      avgMarginTag.textContent = "–";
+      avgMarginAvailableTag.textContent = "–";
+      pctCompromisedTag.textContent = "–";
+      destroyChart("marginBands");
+      destroyChart("status");
+      return;
+    }
+
+    const n = data.length;
+    let countComp = 0, countRazoavel = 0, countLivre = 0;
+    const bands = [0, 0, 0, 0];
+    const statusCounts = {
+      "Margem Livre": 0,
+      "Margem Razoável": 0,
+      "Margem Comprometida": 0,
+      "Sem Margem Disponível": 0
+    };
+
+    data.forEach(row => {
+      const mu = toPercent(row[COLS.MARGEMUTILIZADA]);
+      const status = canonicalStatus(row[COLS.STATUSMARGEM], row[COLS.MARGEMUTILIZADA]);
+
+      if (!isNaN(mu)) {
+        if (mu < 50) bands[0]++;
+        else if (mu >= 50 && mu < 70) bands[1]++;
+        else if (Math.abs(mu - 70) <= 0.01) bands[2]++;
+        else if (mu > 70) bands[3]++;
+      }
+
+      if (statusCounts.hasOwnProperty(status)) {
+        statusCounts[status]++;
+      }
+
+      if (status === "Sem Margem Disponível" || status === "Margem Comprometida") countComp++;
+      if (status === "Margem Razoável") countRazoavel++;
+      if (status === "Margem Livre") countLivre++;
+    });
+
+    const pctComp = n ? (countComp / n) * 100 : 0;
+    const pctRazoavel = n ? (countRazoavel / n) * 100 : 0;
+    const pctLivre = n ? (countLivre / n) * 100 : 0;
+
+    totalColabEl.textContent = n.toString();
+    totalColabTag.textContent = "Registros na visão atual";
+
+    avgMarginUsedEl.textContent = countRazoavel.toString();
+    avgMarginTag.textContent = pctRazoavel.toLocaleString(
+      "pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+    ) + "% da base";
+
+    avgMarginAvailableEl.textContent = countLivre.toString();
+    avgMarginAvailableTag.textContent = pctLivre.toLocaleString(
+      "pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+    ) + "% da base";
+
+    pctCompromisedEl.textContent = countComp.toString();
+    pctCompromisedTag.textContent = pctComp.toLocaleString(
+      "pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+    ) + "% da base";
+
+    summaryChip.textContent = filteredData
+      ? `Base filtrada - ${n} registros`
+      : `Base carregada - ${n} registros`;
+
+    renderChartMarginBands(bands);
+    renderChartStatus(statusCounts);
+    updateRanking();
+  }
+
+  function renderChartMarginBands(bands) {
+    const ctx = document.getElementById("chartMarginBands");
+    if (!ctx) return;
+    destroyChart("marginBands");
+    charts.marginBands = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["0–50", "50,01–69,99", "70", "70,01–100"],
+        datasets: [{
+          label: "Qtd colaboradores",
+          data: bands,
+          backgroundColor: ["#22c55e", "#eab308", "#0ea5e9", "#ef4444"],
+          borderRadius: 8,
+          maxBarThickness: 40
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, ticks: { precision: 0 } }
+        }
+      }
+    });
+  }
+
+  function renderChartStatus(statusCounts) {
+    const ctx = document.getElementById("chartStatus");
+    if (!ctx) return;
+    destroyChart("status");
+    const labels = Object.keys(statusCounts);
+    const values = labels.map(l => statusCounts[l]);
+    const colors = labels.map(status => getStatusColor(status));
+    charts.status = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: "#ffffff"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "bottom" }
+        },
+        cutout: "60%"
+      }
+    });
+  }
+
+  function buildRanking() {
+    const data = getActiveData();
+    if (!data.length) return [];
+    const copy = data.map(row => {
+      const mu = toPercent(row[COLS.MARGEMUTILIZADA]);
+      const md = toPercent(row[COLS.MARGEMDISPONIVEL]);
+      const status = canonicalStatus(row[COLS.STATUSMARGEM], row[COLS.MARGEMUTILIZADA]);
+      return { ...row, MU: mu, MD: md, STATUS: status };
+    });
+
+    const risco = copy
+      .filter(r => !isNaN(r.MU))
+      .sort((a, b) => b.MU - a.MU)
+      .slice(0, 10)
+      .map(r => ({ ...r, TIPO: "Maior risco" }));
+
+    const folga = copy
+      .filter(r => !isNaN(r.MD))
+      .sort((a, b) => b.MD - a.MD)
+      .slice(0, 10)
+      .map(r => ({ ...r, TIPO: "Maior folga" }));
+
+    const seen = new Set();
+    const ranking = [];
+    risco.concat(folga).forEach(r => {
+      const id = `${r[COLS.CHAPA]}|${r[COLS.NOME]}`;
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      ranking.push(r);
+    });
+    return ranking;
+  }
+
+  function updateRanking() {
+    const ranking = buildRanking();
+    lastRanking = ranking;
+    tableRankingBody.innerHTML = "";
+    if (!ranking.length) {
+      tableRankingBody.innerHTML =
+        '<tr><td colspan="9" class="empty-state">Sem dados para ranking.</td></tr>';
+      return;
+    }
+
+    ranking.forEach(r => {
+      const status = r.STATUS;
+      const mu = r.MU;
+      const md = r.MD;
+      const tr = document.createElement("tr");
+      if (status === "Sem Margem Disponível") tr.classList.add("row-critical");
+      tr.innerHTML = `
+        <td>${r[COLS.CHAPA] || "-"}</td>
+        <td>${r[COLS.NOME] || "-"}</td>
+        <td>${r[COLS.CARGO] || "-"}</td>
+        <td>${r[COLS.FUNCAO] || "-"}</td>
+        <td>${r[COLS.SECAO] || "-"}</td>
+        <td>${formatPercent(mu)}%</td>
+        <td>${formatPercent(md)}%</td>
+        <td><span class="status-pill ${getStatusClass(status)}">${status || "-"}</span></td>
+        <td>${r.TIPO || "-"}</td>
+      `;
+      tableRankingBody.appendChild(tr);
+    });
+  }
+
+  function updateBaseCompleta() {
+    const data = getActiveData();
+    baseCountEl.textContent = `${data.length} registros`;
+    tableBaseCompletaBody.innerHTML = "";
+    if (!data.length) {
+      tableBaseCompletaBody.innerHTML =
+        '<tr><td colspan="10" class="empty-state">Sem dados.</td></tr>';
+      return;
+    }
+
+    let list = data.slice();
+    if (baseSortState.key) {
+      const { key, asc } = baseSortState;
+      list.sort((a, b) => compareBaseRows(a, b, key, asc));
+    }
+
+    const activeData = getActiveData();
+
+    list.forEach(row => {
+      const mu = toPercent(row[COLS.MARGEMUTILIZADA]);
+      const md = toPercent(row[COLS.MARGEMDISPONIVEL]);
+      const status = canonicalStatus(row[COLS.STATUSMARGEM], row[COLS.MARGEMUTILIZADA]);
+      const tr = document.createElement("tr");
+      if (status === "Sem Margem Disponível") tr.classList.add("row-critical");
+      const originalIndex = activeData.indexOf(row);
+      tr.innerHTML = `
+        <td>${row[COLS.CHAPA] || "-"}</td>
+        <td>${row[COLS.NOME] || "-"}</td>
+        <td>${row[COLS.CARGO] || "-"}</td>
+        <td>${row[COLS.FUNCAO] || "-"}</td>
+        <td>${row[COLS.SECAO] || "-"}</td>
+        <td>${row[COLS.FILIAL] || "-"}</td>
+        <td><span class="status-pill ${getStatusClass(status)}">${status || "-"}</span></td>
+        <td>${formatPercent(mu)}%</td>
+        <td>${formatPercent(md)}%</td>
+        <td><button class="btn-action" onclick="openDetail(${originalIndex})">Ver detalhes</button></td>
+      `;
+      tableBaseCompletaBody.appendChild(tr);
+    });
+  }
+
+  function compareBaseRows(a, b, key, asc) {
+    let va, vb;
+    if (key === "MU") {
+      va = toPercent(a[COLS.MARGEMUTILIZADA]); vb = toPercent(b[COLS.MARGEMUTILIZADA]);
+    } else if (key === "MD") {
+      va = toPercent(a[COLS.MARGEMDISPONIVEL]); vb = toPercent(b[COLS.MARGEMDISPONIVEL]);
+    } else if (key === "STATUS") {
+      va = canonicalStatus(a[COLS.STATUSMARGEM], a[COLS.MARGEMUTILIZADA]);
+      vb = canonicalStatus(b[COLS.STATUSMARGEM], b[COLS.MARGEMUTILIZADA]);
+    } else {
+      const col = COLS[key] || key;
+      va = a[col]; vb = b[col];
+    }
+
+    let cmp;
+    if (typeof va === "number" && typeof vb === "number") {
+      cmp = va - vb;
+    } else {
+      const sva = String(va ?? "");
+      const svb = String(vb ?? "");
+      cmp = sva.localeCompare(svb, "pt-BR");
+    }
+    return asc ? cmp : -cmp;
+  }
+
+  document.querySelectorAll('#view-base th.sortable').forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.sortKey;
+      if (!key) return;
+      if (baseSortState.key === key) {
+        baseSortState.asc = !baseSortState.asc;
+      } else {
+        baseSortState.key = key;
+        baseSortState.asc = true;
+      }
+      updateBaseCompleta();
+    });
+  });
+
+  function openDetail(index) {
+    const data = getActiveData();
+    const row = data[index];
+    if (!row) return;
+
+    const status = canonicalStatus(row[COLS.STATUSMARGEM], row[COLS.MARGEMUTILIZADA]);
+    const salario = toNumber(row[COLS.REMUNERACAO]);
+    const margem35Col = toNumber(row[COLS.MARGEM35]);
+    const margem35Calc = !isNaN(margem35Col) && margem35Col > 0
+      ? margem35Col
+      : (!isNaN(salario) && salario > 0 ? salario * 0.35 : NaN);
+
+    modalBody.innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">CHAPA</div>
+          <div class="detail-value">${row[COLS.CHAPA] || "-"}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Nome</div>
+          <div class="detail-value">${row[COLS.NOME] || "-"}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Cargo</div>
+          <div class="detail-value">${row[COLS.CARGO] || "-"}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Função</div>
+          <div class="detail-value">${row[COLS.FUNCAO] || "-"}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Seção</div>
+          <div class="detail-value">${row[COLS.SECAO] || "-"}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Filial</div>
+          <div class="detail-value">${row[COLS.FILIAL] || "-"}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Situação</div>
+          <div class="detail-value">${row[COLS.SITUACAO] || "-"}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Status normalizado</div>
+          <div class="detail-value" style="color:${getStatusColor(status)};">
+            ${status || "-"}
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Remuneração total</div>
+          <div class="detail-value">${formatBRL(row[COLS.REMUNERACAO])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Margem utilizada (%)</div>
+          <div class="detail-value" style="color:${getStatusColor(status)};font-size:18px;">
+            ${formatPercent(row[COLS.MARGEMUTILIZADA])}%
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Margem disponível (%)</div>
+          <div class="detail-value" style="color:#0ea5e9;font-size:18px;">
+            ${formatPercent(row[COLS.MARGEMDISPONIVEL])}%
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Margem 35% sobre remuneração</div>
+          <div class="detail-value">${formatBRL(margem35Calc)}</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Total parcelas crédito trabalhador</div>
+          <div class="detail-value">${formatBRL(row[COLS.CREDTRAB_PARCELAS])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Parcela superior ao limite?</div>
+          <div class="detail-value">
+            ${String(row[COLS.PARCELA_SUPERIOR_LIMITE] || "").toUpperCase() || "-"}
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Vision - Limite</div>
+          <div class="detail-value">${formatBRL(row[COLS.LIMITEVISION])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Vision - Uso mensal</div>
+          <div class="detail-value">${formatBRL(row[COLS.USOVISION])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Supermercado - Limite</div>
+          <div class="detail-value">${formatBRL(row[COLS.LIMITEMERCADO])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Supermercado - Uso mensal</div>
+          <div class="detail-value">${formatBRL(row[COLS.USOMERCADO])}</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Alimentação - Uso mensal</div>
+          <div class="detail-value">${formatBRL(row[COLS.ALIMENTACAO_USO])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Transporte - Uso mensal</div>
+          <div class="detail-value">${formatBRL(row[COLS.TRANSPORTE_USO])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Encargos - Uso mensal</div>
+          <div class="detail-value">${formatBRL(row[COLS.ENCARGOS_USO])}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Unimed - Uso mensal</div>
+          <div class="detail-value">${formatBRL(row[COLS.UNIMED_USO])}</div>
+        </div>
+      </div>
+    `;
+
+    detailModal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    detailModal.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  window.openDetail = openDetail;
+  window.closeModal = closeModal;
+
+  // ANÁLISE POR CARGO – agora agrupa pelo campo CARGO da planilha
+  function renderFuncaoView() {
+    const data = getActiveData();
+    if (!data.length) return;
+    const map = {};
+    data.forEach(row => {
+      const cargo = row[COLS.CARGO] || "Sem cargo";
+      const mu = toPercent(row[COLS.MARGEMUTILIZADA]);
+      if (isNaN(mu)) return;
+      if (!map[cargo]) map[cargo] = { sum: 0, count: 0 };
+      map[cargo].sum += mu;
+      map[cargo].count += 1;
+    });
+
+    const entries = Object.entries(map)
+      .map(([cargo, v]) => ({ cargo, avg: v.sum / v.count }))
+      .sort((a, b) => b.avg - a.avg)
+      .slice(0, 10);
+
+    const ctx = document.getElementById("chartFuncaoDetailed");
+    if (!ctx) return;
+    destroyChart("funcaoDetailed");
+
+    charts.funcaoDetailed = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: entries.map(e => e.cargo),
+        datasets: [{
+          label: "Média de margem utilizada (%) por Cargo",
+          data: entries.map(e => e.avg),
+          backgroundColor: "#004A8D"
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => formatPercent(c.parsed.x) + "%" } }
+        },
+        scales: {
+          x: { beginAtZero: true },
+          y: { grid: { display: false }, ticks: { autoSkip: false, font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  function renderFilialView() {
+    const data = getActiveData();
+    if (!data.length) return;
+
+    const filialMap = {};
+    const filialSecaoMap = {};
+
+    data.forEach(row => {
+      const filial = row[COLS.FILIAL] || "Sem filial";
+      const secao = row[COLS.SECAO] || "Sem seção";
+      const mu = toPercent(row[COLS.MARGEMUTILIZADA]);
+      if (isNaN(mu)) return;
+
+      if (!filialMap[filial]) filialMap[filial] = { sum: 0, count: 0 };
+      filialMap[filial].sum += mu; filialMap[filial].count++;
+
+      if (!filialSecaoMap[filial]) filialSecaoMap[filial] = {};
+      if (!filialSecaoMap[filial][secao]) filialSecaoMap[filial][secao] = { sum: 0, count: 0 };
+      filialSecaoMap[filial][secao].sum += mu;
+      filialSecaoMap[filial][secao].count++;
+    });
+
+    filialSecaoCache = filialSecaoMap;
+
+    const filialEntries = Object.entries(filialMap)
+      .map(([k, v]) => ({ filial: k, avg: v.sum / v.count }))
+      .sort((a, b) => b.avg - a.avg)
+      .slice(0, 25);
+
+    const secaoContainer = document.getElementById("secaoContainer");
+    if (secaoContainer) secaoContainer.style.display = "none";
+
+    const ctxF = document.getElementById("chartFilialDetailed");
+    if (ctxF) {
+      destroyChart("filialDetailed");
+      charts.filialDetailed = new Chart(ctxF, {
+        type: "bar",
+        data: {
+          labels: filialEntries.map(e => e.filial),
+          datasets: [{
+            label: "Média de margem utilizada (%) por Filial",
+            data: filialEntries.map(e => e.avg),
+            backgroundColor: "#004A8D"
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => formatPercent(c.parsed.x) + "%" } }
+          },
+          scales: {
+            x: { beginAtZero: true },
+            y: {
+              grid: { display: false },
+              ticks: { autoSkip: false, font: { size: 10 } }
+            }
+          },
+          onClick: (e, elements) => {
+            if (!elements.length) return;
+            const idx = elements[0].index;
+            const filial = charts.filialDetailed.data.labels[idx];
+            renderSecaoForFilial(filial);
+          }
+        }
+      });
+    }
+  }
+
+  function renderSecaoForFilial(filial) {
+    const ctxS = document.getElementById("chartSecaoDetailed");
+    const secaoContainer = document.getElementById("secaoContainer");
+    if (!ctxS || !secaoContainer) return;
+
+    destroyChart("secaoDetailed");
+
+    let labels = [];
+    let data = [];
+    let titleLabel = "";
+
+    if (filial && filialSecaoCache[filial]) {
+      const map = filialSecaoCache[filial];
+      const entries = Object.entries(map)
+        .map(([secao, v]) => ({ secao, avg: v.sum / v.count }))
+        .sort((a, b) => b.avg - a.avg)
+        .slice(0, 25);
+      labels = entries.map(e => e.secao);
+      data = entries.map(e => e.avg);
+      titleLabel = `Seções da filial: ${filial}`;
+    } else {
+      secaoContainer.style.display = "none";
+      return;
+    }
+
+    secaoContainer.style.display = "block";
+
+    charts.secaoDetailed = new Chart(ctxS, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: titleLabel,
+          data,
+          backgroundColor: "#3b82f6"
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => formatPercent(c.parsed.x) + "%" } }
+        },
+        scales: {
+          x: { beginAtZero: true },
+          y: {
+            grid: { display: false },
+            ticks: { autoSkip: false, font: { size: 10 } }
+          }
+        }
+      }
+    });
+  }
+
+  function renderCreditoView() {
+    const data = getActiveData();
+    if (!data.length) {
+      creditoTotalValidEl.textContent = "–";
+      creditoAcimaEl.textContent = "–";
+      creditoDentroEl.textContent = "–";
+      creditoPctAcimaEl.textContent = "–";
+      tableCreditoBaseBody.innerHTML =
+        '<tr><td colspan="9" class="empty-state">Carregue um CSV para visualizar.</td></tr>';
+      tableCreditoCargoRankingBody.innerHTML =
+        '<tr><td colspan="3" class="empty-state">Sem dados.</td></tr>';
+      tableCreditoFilialRankingBody.innerHTML =
+        '<tr><td colspan="3" class="empty-state">Sem dados.</td></tr>';
+      destroyChart("creditoLimite");
+      return;
+    }
+
+    const valid = [];
+    let totalValid = 0, acima = 0, dentro = 0;
+
+    data.forEach(row => {
+      const salario = toNumber(row[COLS.REMUNERACAO]);
+      const parcelas = toNumber(row[COLS.CREDTRAB_PARCELAS]);
+      const margem35Col = toNumber(row[COLS.MARGEM35]);
+
+      if (isNaN(salario) || salario <= 0 || isNaN(parcelas) || parcelas <= 0) return;
+
+      const margem35 = (!isNaN(margem35Col) && margem35Col > 0) ? margem35Col : (0.35 * salario);
+      const pct = (parcelas / salario) * 100;
+      const over = parcelas > margem35;
+
+      totalValid++;
+      if (over) acima++; else dentro++;
+
+      valid.push({
+        nome: row[COLS.NOME] || "-",
+        filial: row[COLS.FILIAL] || "-",
+        cargo: row[COLS.CARGO] || "-",
+        funcao: row[COLS.FUNCAO] || "-",
+        salario,
+        margem35,
+        parcelas,
+        pct,
+        acima: over
+      });
+    });
+
+    creditoBaseData = valid;
+
+    creditoTotalValidEl.textContent = (totalValid || 0).toString();
+    creditoAcimaEl.textContent = (acima || 0).toString();
+    creditoDentroEl.textContent = (dentro || 0).toString();
+
+    creditoTotalValidTagEl.textContent = totalValid ? "Com remuneração e parcelas > 0" : "Nenhum registro válido";
+    creditoAcimaTagEl.textContent = acima ? "Acima do limite" : "Nenhum acima do limite";
+    creditoDentroTagEl.textContent = dentro ? "Dentro do limite" : "Nenhum dentro do limite";
+
+    const pctAcima = totalValid ? (acima / totalValid) * 100 : 0;
+    creditoPctAcimaEl.textContent = pctAcima.toLocaleString(
+      "pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+    );
+    creditoPctAcimaTagEl.textContent =
+      pctAcima >= 30 ? "Atenção: elevado acima do limite" : "Faixa de risco controlada";
+
+    renderCreditoBaseTable();
+
+    const ctx = document.getElementById("chartCreditoLimite");
+    if (ctx) {
+      destroyChart("creditoLimite");
+      charts.creditoLimite = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Parcela > 35% (Sim)", "Parcela ≤ 35% (Não)"],
+          datasets: [{
+            label: "Qtd colaboradores",
+            data: [acima, dentro],
+            backgroundColor: ["#ef4444", "#22c55e"]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+
+    renderCreditoRankings(valid);
+  }
+
+  function renderCreditoBaseTable() {
+    tableCreditoBaseBody.innerHTML = "";
+    if (!creditoBaseData || !creditoBaseData.length) {
+      tableCreditoBaseBody.innerHTML =
+        '<tr><td colspan="9" class="empty-state">Sem registros válidos.</td></tr>';
+      return;
+    }
+
+    const data = creditoBaseData.slice();
+    const { key, asc } = creditoSortState;
+    data.sort((a, b) => {
+      let va = a[key], vb = b[key];
+      if (key === "acima") {
+        va = a.acima ? 1 : 0;
+        vb = b.acima ? 1 : 0;
+        return asc ? va - vb : vb - va;
+      }
+      if (typeof va === "number" && typeof vb === "number") {
+        return asc ? va - vb : vb - va;
+      }
+      const sva = String(va ?? "");
+      const svb = String(vb ?? "");
+      return asc ? sva.localeCompare(svb, "pt-BR") : svb.localeCompare(sva, "pt-BR");
+    });
+
+    data.forEach(r => {
+      const tr = document.createElement("tr");
+      if (r.acima) tr.classList.add("row-critical");
+      tr.innerHTML = `
+        <td>${r.nome}</td>
+        <td>${r.filial}</td>
+        <td>${r.cargo}</td>
+        <td>${r.funcao}</td>
+        <td>${formatBRL(r.salario)}</td>
+        <td>${formatBRL(r.margem35)}</td>
+        <td>${formatBRL(r.parcelas)}</td>
+        <td>${r.pct.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td><span class="status-pill ${r.acima ? "status-comprometida" : "status-livre"}">${r.acima ? "Sim" : "Não"}</span></td>
+      `;
+      tableCreditoBaseBody.appendChild(tr);
+    });
+  }
+
+  document.querySelectorAll("#tableCreditoBase thead th.sortable").forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.sortKey;
+      if (!key || !creditoBaseData) return;
+      if (creditoSortState.key === key) {
+        creditoSortState.asc = !creditoSortState.asc;
+      } else {
+        creditoSortState.key = key;
+        creditoSortState.asc = true;
+      }
+      renderCreditoBaseTable();
+    });
+  });
+
+  // RANKING TOP CARGOS – agora usando somente CARGO da planilha, não função
+  function renderCreditoRankings(valid) {
+    const cargoMap = {};
+    const filialMap = {};
+
+    valid.forEach(r => {
+      const chaveCargo = r.cargo || "Sem cargo";
+      if (!cargoMap[chaveCargo]) cargoMap[chaveCargo] = { sumPct: 0, count: 0 };
+      cargoMap[chaveCargo].sumPct += r.pct;
+      cargoMap[chaveCargo].count++;
+
+      if (!filialMap[r.filial]) filialMap[r.filial] = { sumPct: 0, count: 0 };
+      filialMap[r.filial].sumPct += r.pct;
+      filialMap[r.filial].count++;
+    });
+
+    const cargoRank = Object.entries(cargoMap)
+      .map(([cargo, v]) => ({ cargo, qtd: v.count, media: v.sumPct / v.count }))
+      .sort((a, b) => b.media - a.media)
+      .slice(0, 10);
+
+    const filialRank = Object.entries(filialMap)
+      .map(([filial, v]) => ({ filial, qtd: v.count, media: v.sumPct / v.count }))
+      .sort((a, b) => b.media - a.media)
+      .slice(0, 10);
+
+    tableCreditoCargoRankingBody.innerHTML = "";
+    if (!cargoRank.length) {
+      tableCreditoCargoRankingBody.innerHTML =
+        '<tr><td colspan="3" class="empty-state">Sem dados.</td></tr>';
+    } else {
+      cargoRank.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.cargo}</td>
+          <td>${r.qtd}</td>
+          <td>${r.media.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        `;
+        tableCreditoCargoRankingBody.appendChild(tr);
+      });
+    }
+
+    tableCreditoFilialRankingBody.innerHTML = "";
+    if (!filialRank.length) {
+      tableCreditoFilialRankingBody.innerHTML =
+        '<tr><td colspan="3" class="empty-state">Sem dados.</td></tr>';
+    } else {
+      filialRank.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.filial}</td>
+          <td>${r.qtd}</td>
+          <td>${r.media.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        `;
+        tableCreditoFilialRankingBody.appendChild(tr);
+      });
+    }
+  }
+
+  function renderConveniosView() {
+    const data = getActiveData();
+    if (!data.length) return;
+
+    let sumLimV = 0, sumUsoV = 0, countV = 0;
+    let sumLimM = 0, sumUsoM = 0, countM = 0;
+    const topVision = [];
+    const topMarket = [];
+
+    data.forEach(row => {
+      const limV = toNumber(row[COLS.LIMITEVISION]);
+      const usoV = toNumber(row[COLS.USOVISION]);
+      const limM = toNumber(row[COLS.LIMITEMERCADO]);
+      const usoM = toNumber(row[COLS.USOMERCADO]);
+
+      if (!isNaN(limV) && limV > 0 && !isNaN(usoV) && usoV >= 0) {
+        sumLimV += limV; sumUsoV += usoV; countV++;
+        topVision.push({ nome: row[COLS.NOME] || "-", uso: usoV });
+      }
+      if (!isNaN(limM) && limM > 0 && !isNaN(usoM) && usoM >= 0) {
+        sumLimM += limM; sumUsoM += usoM; countM++;
+        topMarket.push({ nome: row[COLS.NOME] || "-", uso: usoM });
+      }
+    });
+
+    const avgLimV = countV ? sumLimV / countV : 0;
+    const avgUsoV = countV ? sumUsoV / countV : 0;
+    const avgLimM = countM ? sumLimM / countM : 0;
+    const avgUsoM = countM ? sumUsoM / countM : 0;
+
+    const ctxV = document.getElementById("chartVisionDetailed");
+    if (ctxV) {
+      destroyChart("visionDetailed");
+      charts.visionDetailed = new Chart(ctxV, {
+        type: "bar",
+        data: {
+          labels: ["Limite médio", "Uso médio"],
+          datasets: [{
+            label: "Vision (R$)",
+            data: [avgLimV, avgUsoV],
+            backgroundColor: ["#004A8D", "#3b82f6"]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    const ctxM = document.getElementById("chartMarketDetailed");
+    if (ctxM) {
+      destroyChart("marketDetailed");
+      charts.marketDetailed = new Chart(ctxM, {
+        type: "bar",
+        data: {
+          labels: ["Limite médio", "Uso médio"],
+          datasets: [{
+            label: "Supermercado (R$)",
+            data: [avgLimM, avgUsoM],
+            backgroundColor: ["#F7941D", "#FDC180"]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    topVision.sort((a, b) => b.uso - a.uso);
+    topMarket.sort((a, b) => b.uso - a.uso);
+    const vTop = topVision.slice(0, 10);
+    const mTop = topMarket.slice(0, 10);
+
+    const ctxVT = document.getElementById("chartVisionTop");
+    if (ctxVT) {
+      destroyChart("visionTop");
+      charts.visionTop = new Chart(ctxVT, {
+        type: "bar",
+        data: {
+          labels: vTop.map(v => v.nome),
+          datasets: [{
+            label: "Uso mensal Vision (R$)",
+            data: vTop.map(v => v.uso),
+            backgroundColor: "#004A8D"
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    const ctxMT = document.getElementById("chartMarketTop");
+    if (ctxMT) {
+      destroyChart("marketTop");
+      charts.marketTop = new Chart(ctxMT, {
+        type: "bar",
+        data: {
+          labels: mTop.map(v => v.nome),
+          datasets: [{
+            label: "Uso mensal Supermercado (R$)",
+            data: mTop.map(v => v.uso),
+            backgroundColor: "#F7941D"
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+    }
+  }
+</script>
+</body>
+<script>
+    // Desabilita botão direito
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // Desabilita seleção de texto
+    document.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+    });
+
+    // Desabilita atalhos de cópia comuns
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U (ver código fonte)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+            e.preventDefault();
+        }
+        // F12 (Ferramentas de desenvolvedor)
+        if (e.key === 'F12') {
+            e.preventDefault();
+        }
+    });
+</script>
+</html>
